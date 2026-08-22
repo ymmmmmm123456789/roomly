@@ -1,0 +1,91 @@
+
+:root{
+  --bg:#f7f2ec;
+  --paper:#fffdf9;
+  --ink:#2e2925;
+  --muted:#8f857d;
+  --line:#e7ddd4;
+  --accent:#c85f3f;
+  --accent-soft:#f5ded5;
+  --shadow:0 10px 28px rgba(62,45,35,.08);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",sans-serif}
+body{padding-bottom:90px}
+button,select{font:inherit}
+button{cursor:pointer}
+.topbar{position:sticky;top:0;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:rgba(247,242,236,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.brand{font-family:Georgia,serif;letter-spacing:.08em;font-size:20px}
+.beta{font-size:11px;border:1px solid var(--line);padding:4px 8px;border-radius:999px;color:var(--muted)}
+.app{max-width:760px;margin:auto}
+.screen{display:none;padding:20px 16px 32px}
+.screen.active{display:block}
+.hero{padding:24px 0 12px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:500}
+h1{font-size:38px;line-height:1.12;margin:0 0 16px}
+h2{font-size:28px;line-height:1.25;margin:4px 0 12px}
+h3{margin:0 0 8px;font-size:18px}
+.lead{font-size:15px;line-height:1.8;color:var(--muted);margin-bottom:22px}
+.lead.small{margin-top:0;font-size:14px}
+.primary{width:100%;border:0;border-radius:18px;background:var(--accent);color:white;padding:16px 18px;font-weight:700;box-shadow:var(--shadow)}
+.secondary,.ghost{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:14px;padding:10px 12px}
+.ghost{padding:8px 0;border:0;background:transparent;color:var(--muted)}
+.note,.muted{color:var(--muted)}
+.note{font-size:12px;text-align:center;margin-top:10px}
+.tiny{font-size:11px}
+.masonry{columns:2;column-gap:10px;margin-top:20px}
+.masonry img{width:100%;border-radius:18px;margin-bottom:10px;display:block}
+.section-head{margin-bottom:18px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.panel label{display:block;font-size:13px;color:var(--muted);margin-bottom:12px}
+.panel label:last-child{margin-bottom:0}
+select{width:100%;margin-top:7px;border:1px solid var(--line);background:white;border-radius:14px;padding:13px;color:var(--ink)}
+.results-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.result-card{border:0;background:transparent;padding:0;text-align:left}
+.result-card img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:18px;display:block}
+.result-meta{padding:8px 2px}
+.match{font-size:13px;color:var(--accent);font-weight:800}
+.result-name{font-size:13px;margin-top:2px}
+.detail-image{width:100%;max-height:520px;object-fit:cover;border-radius:24px}
+.score-row{display:flex;justify-content:space-between;align-items:center;margin:16px 0}
+.match-big{font-family:Georgia,serif;font-size:42px}
+.sense-chip{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:8px 12px;font-size:12px}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tags span{border:1px solid var(--line);background:white;border-radius:999px;padding:7px 10px;font-size:12px}
+.sense-panel{background:#f2eee7}
+.reference-card{display:flex;gap:12px;align-items:center;border:1px solid var(--line);background:var(--paper);border-radius:18px;padding:10px;margin-bottom:14px}
+.reference-card img{width:58px;height:58px;object-fit:cover;border-radius:12px}
+.room-canvas{position:relative;aspect-ratio:1/1.05;background:#f0eadf;border:2px solid #d8cbbb;border-radius:24px;overflow:visible;touch-action:none;margin-bottom:14px;background-image:linear-gradient(#e9dfd3 1px,transparent 1px),linear-gradient(90deg,#e9dfd3 1px,transparent 1px);background-size:12.5% 12.5%}
+.window-mark,.door-mark{position:absolute;font-size:11px;color:#8a7869;background:#f7f2ec;padding:4px 8px;border-radius:999px;border:1px solid #ddd1c5}
+.window-mark{top:-10px;left:16%}
+.door-mark{right:-8px;bottom:12%}
+.furniture{position:absolute;display:flex;align-items:center;justify-content:center;border:2px solid #bfae9d;background:#fffaf5;color:#493d33;user-select:none;touch-action:none;box-shadow:0 5px 14px rgba(70,50,36,.1);font-size:12px}
+.furniture.selected{outline:3px solid var(--accent);outline-offset:2px}
+.furniture.dragging{transform:scale(1.04);box-shadow:0 12px 26px rgba(70,50,36,.18);z-index:10}
+.furniture.sofa{width:36%;height:15%;border-radius:14px}
+.furniture.tv{width:30%;height:7%;border-radius:8px}
+.furniture.table{width:20%;aspect-ratio:1;border-radius:50%}
+.furniture.rug{width:48%;height:30%;border-radius:14px;background:#e9dfd4}
+.furniture.plant{width:14%;aspect-ratio:1;border-radius:50%}
+.furniture.lamp{width:12%;aspect-ratio:1;border-radius:50%}
+.furniture.shelf{width:24%;height:10%;border-radius:8px}
+.furniture-toolbar{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
+.furniture-toolbar button{min-width:76px;border:1px solid var(--line);background:var(--paper);border-radius:16px;padding:10px 8px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.furniture-toolbar span{font-size:11px;color:var(--muted)}
+.editor-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.coach-card{display:flex;gap:14px;align-items:center;margin-top:14px;padding:16px;border-radius:20px;background:#efe7dc;border:1px solid #ddcfbf}
+.hidden{display:none}
+.score-ring{min-width:64px;height:64px;border-radius:50%;border:6px solid var(--accent);display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:22px}
+.coach-card p{margin:4px 0;font-size:13px;line-height:1.6}
+.lesson{color:var(--accent);font-weight:700}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:30;display:grid;grid-template-columns:repeat(4,1fr);background:rgba(255,253,249,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px max(8px,env(safe-area-inset-left)) calc(8px + env(safe-area-inset-bottom))}
+.bottom-nav button{border:0;background:transparent;color:#aaa;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:18px}
+.bottom-nav button span{font-size:10px}
+.bottom-nav button.active{color:var(--accent)}
+@media(min-width:700px){
+  .screen{padding:30px}
+  .hero{padding-top:34px}
+  h1{font-size:52px}
+  .results-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

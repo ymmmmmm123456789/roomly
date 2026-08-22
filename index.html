@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f2ec" />
+  <title>ROOMLY — Pinterestの憧れを、自分の部屋サイズに。</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">ROOMLY</div>
+    <div class="beta">BETA</div>
+  </header>
+
+  <main class="app">
+    <section class="screen active" id="homeScreen">
+      <div class="hero">
+        <p class="eyebrow">Pinterest × your room</p>
+        <h1>Pinterestの憧れを、<br>自分の部屋サイズに。</h1>
+        <p class="lead">保存した“好き”から、自分の部屋で真似しやすいインテリアを見つけよう。</p>
+        <button class="primary" id="startBtn">Pinterest連携を試す（デモ）</button>
+        <p class="note">β版ではデモデータを使います。Pinterest APIはまだ未接続です。</p>
+      </div>
+
+      <div class="masonry" aria-label="インテリア参考画像">
+        <img src="assets/inspo1.jpg" alt="参考インテリア1">
+        <img src="assets/inspo2.jpg" alt="参考インテリア2">
+        <img src="assets/inspo8.jpg" alt="参考インテリア3">
+        <img src="assets/inspo6.jpg" alt="参考インテリア4">
+      </div>
+    </section>
+
+    <section class="screen" id="roomSetupScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="homeScreen">← 戻る</button>
+        <p class="eyebrow">STEP 1</p>
+        <h2>まず、自分の部屋を教えて。</h2>
+      </div>
+
+      <div class="panel">
+        <label>部屋の広さ
+          <select id="roomSize">
+            <option value="6">6畳</option>
+            <option value="8" selected>8畳</option>
+            <option value="10">10畳</option>
+            <option value="12">12畳以上</option>
+          </select>
+        </label>
+        <label>部屋の形
+          <select id="roomShape">
+            <option value="rect" selected>長方形</option>
+            <option value="square">正方形</option>
+            <option value="ldk">LDK</option>
+          </select>
+        </label>
+        <label>住まい
+          <select id="housing">
+            <option value="rental" selected>賃貸</option>
+            <option value="owned">持ち家</option>
+          </select>
+        </label>
+      </div>
+
+      <button class="primary" id="matchBtn">この部屋に合うPinを見る</button>
+    </section>
+
+    <section class="screen" id="resultsScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="roomSetupScreen">← 条件を変える</button>
+        <p class="eyebrow">ROOM MATCH</p>
+        <h2>この部屋なら、こんなPinが真似しやすい。</h2>
+        <p class="lead small">写真をタップすると「何を真似するか」を見られます。</p>
+      </div>
+
+      <div class="results-grid" id="resultsGrid"></div>
+    </section>
+
+    <section class="screen" id="detailScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="resultsScreen">← 戻る</button>
+        <p class="eyebrow">PIN DETAIL</p>
+        <h2 id="detailTitle">このPinから真似するなら</h2>
+      </div>
+      <img id="detailImage" class="detail-image" alt="">
+      <div class="score-row">
+        <div>
+          <div class="match-big" id="detailScore">92%</div>
+          <div class="muted">ROOM MATCH</div>
+        </div>
+        <div class="sense-chip">Sense tip</div>
+      </div>
+
+      <div class="panel">
+        <h3>合う理由</h3>
+        <p id="detailWhy"></p>
+      </div>
+
+      <div class="panel">
+        <h3>真似するなら</h3>
+        <div class="tags" id="detailTags"></div>
+      </div>
+
+      <div class="panel sense-panel">
+        <h3>なぜおしゃれ？</h3>
+        <p id="detailSense"></p>
+      </div>
+
+      <button class="primary" id="tryLayoutBtn">この雰囲気でレイアウトしてみる</button>
+    </section>
+
+    <section class="screen" id="editorScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="detailScreen">← 戻る</button>
+        <p class="eyebrow">MY ROOM EDITOR</p>
+        <h2>指で家具を動かしてみよう。</h2>
+        <p class="lead small">家具はタップして選択 → そのままドラッグ。スマホ操作優先。</p>
+      </div>
+
+      <div class="reference-card">
+        <img id="referenceImage" alt="参考インテリア">
+        <div>
+          <div class="muted tiny">参考Pin</div>
+          <strong id="referenceTitle">Inspiration</strong>
+        </div>
+      </div>
+
+      <div id="roomCanvas" class="room-canvas" aria-label="2D room editor">
+        <div class="window-mark">窓</div>
+        <div class="door-mark">入口</div>
+      </div>
+
+      <div class="furniture-toolbar" id="furnitureToolbar">
+        <button data-type="sofa">🛋️<span>ソファ</span></button>
+        <button data-type="tv">📺<span>TV</span></button>
+        <button data-type="table">◯<span>テーブル</span></button>
+        <button data-type="rug">▭<span>ラグ</span></button>
+        <button data-type="plant">🌿<span>植物</span></button>
+        <button data-type="lamp">💡<span>ライト</span></button>
+        <button data-type="shelf">▥<span>棚</span></button>
+      </div>
+
+      <div class="editor-actions">
+        <button class="secondary" id="deleteSelectedBtn">選択中を削除</button>
+        <button class="secondary" id="clearBtn">全部クリア</button>
+      </div>
+
+      <button class="primary" id="coachBtn">Sense Coachに見てもらう</button>
+
+      <div class="coach-card hidden" id="coachCard" aria-live="polite">
+        <div class="score-ring"><span id="senseScore">78</span></div>
+        <div>
+          <h3>Sense Coach</h3>
+          <p id="coachText">中央に少し余白を残すと、視線が奥まで抜けて広く見えます。</p>
+          <p class="lesson" id="lessonText">今日覚えたこと：家具の高さを揃える</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button data-nav="homeScreen" class="active">⌂<span>Home</span></button>
+    <button data-nav="resultsScreen">♡<span>Inspo</span></button>
+    <button data-nav="editorScreen">▦<span>My Room</span></button>
+    <button data-nav="detailScreen">✦<span>Sense</span></button>
+  </nav>
+
+  <script src="app.js"></script>
+</body>
+</html>
