@@ -89,3 +89,6 @@ select{width:100%;margin-top:7px;border:1px solid var(--line);background:white;b
   h1{font-size:52px}
   .results-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+.layer-controls{grid-template-columns:repeat(2,1fr)}
+@media(min-width:560px){.layer-controls{grid-template-columns:repeat(4,1fr)}}

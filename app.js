@@ -3,6 +3,8 @@ const screens = [...document.querySelectorAll(".screen")];
 const navButtons = [...document.querySelectorAll(".bottom-nav button")];
 let currentPin = null;
 let selectedFurniture = null;
+const LAYOUT_STORAGE_KEY = "roomly-myroom-layout-v2";
+const ROOM_STORAGE_KEY = "roomly-room-settings-v1";
 
 const pins = [
   {img:"inspo8.jpg",name:"Graphic warm",base:94,why:"低めのソファと大きめラグで、視線が散らかりにくい。8畳でもまとまりを作りやすい構成です。",tags:["白いローソファ","柄ラグ","オレンジ照明"],sense:"白と木をベースに、オレンジを少量だけ使っているので、物が多くても全体がまとまって見えます。"},
@@ -29,7 +31,12 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 }));
 
 document.getElementById("matchBtn").addEventListener("click",()=>{
-  renderResults();
+  ["roomSize","roomShape","housing"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",saveRoomSettings);
+});
+restoreRoomSettings();
+
+renderResults();
   showScreen("resultsScreen");
 });
 
@@ -70,7 +77,9 @@ function openDetail(pin,score){
 
 document.getElementById("tryLayoutBtn").addEventListener("click",()=>{
   if(!currentPin) return;
-  if(!document.querySelector(".furniture")) seedFurniture();
+  if(!document.querySelector(".furniture")){
+    if(!restoreLayout()) seedFurniture();
+  }
   showScreen("editorScreen");
 });
 
@@ -85,7 +94,57 @@ const specs={
   shelf:{label:"SHELF",cls:"shelf"}
 };
 
-function addFurniture(type,x=42,y=42){
+
+function saveLayout(){
+  try{
+    const items=[...document.querySelectorAll(".furniture")].map((el,index)=>({
+      type:el.dataset.type,
+      left:el.style.left,
+      top:el.style.top,
+      zIndex:el.style.zIndex || String(index+1)
+    }));
+    localStorage.setItem(LAYOUT_STORAGE_KEY,JSON.stringify(items));
+  }catch(_){}
+}
+
+function restoreLayout(){
+  try{
+    const items=JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY)||"null");
+    if(!Array.isArray(items)||!items.length)return false;
+    document.querySelectorAll(".furniture").forEach(x=>x.remove());
+    items.forEach(item=>{
+      const el=addFurniture(item.type,0,0,false);
+      el.style.left=item.left||"40%";
+      el.style.top=item.top||"40%";
+      el.style.zIndex=item.zIndex||"";
+    });
+    selectedFurniture=null;
+    document.querySelectorAll(".furniture").forEach(x=>x.classList.remove("selected"));
+    return true;
+  }catch(_){return false;}
+}
+
+function saveRoomSettings(){
+  try{
+    localStorage.setItem(ROOM_STORAGE_KEY,JSON.stringify({
+      size:document.getElementById("roomSize").value,
+      shape:document.getElementById("roomShape").value,
+      housing:document.getElementById("housing").value
+    }));
+  }catch(_){}
+}
+
+function restoreRoomSettings(){
+  try{
+    const d=JSON.parse(localStorage.getItem(ROOM_STORAGE_KEY)||"null");
+    if(!d)return;
+    if(d.size)document.getElementById("roomSize").value=d.size;
+    if(d.shape)document.getElementById("roomShape").value=d.shape;
+    if(d.housing)document.getElementById("housing").value=d.housing;
+  }catch(_){}
+}
+
+function addFurniture(type,x=42,y=42,shouldSave=true){
   const spec=specs[type];
   const el=document.createElement("div");
   el.className=`furniture ${spec.cls}`;
@@ -96,6 +155,9 @@ function addFurniture(type,x=42,y=42){
   canvas.appendChild(el);
   bindFurniture(el);
   selectFurniture(el);
+  if(type==="rug") el.style.zIndex="1";
+  else el.style.zIndex=String(10 + document.querySelectorAll(".furniture").length);
+  if(shouldSave) saveLayout();
   return el;
 }
 
@@ -139,6 +201,7 @@ function bindFurniture(el){
     el.classList.remove("dragging");
     try{el.releasePointerCapture(e.pointerId)}catch(_){}
     drag=null;
+    saveLayout();
   };
   el.addEventListener("pointerup",end);
   el.addEventListener("pointercancel",end);
@@ -152,12 +215,32 @@ document.querySelectorAll("#furnitureToolbar button").forEach(btn=>{
 });
 
 document.getElementById("deleteSelectedBtn").addEventListener("click",()=>{
-  if(selectedFurniture){selectedFurniture.remove();selectedFurniture=null;}
+  if(selectedFurniture){
+    selectedFurniture.remove();
+    selectedFurniture=null;
+    saveLayout();
+  }
 });
 document.getElementById("clearBtn").addEventListener("click",()=>{
   document.querySelectorAll(".furniture").forEach(x=>x.remove());
   selectedFurniture=null;
+  try{localStorage.removeItem(LAYOUT_STORAGE_KEY)}catch(_){}
   document.getElementById("coachCard").classList.add("hidden");
+});
+
+
+document.getElementById("bringFrontBtn").addEventListener("click",()=>{
+  if(!selectedFurniture) return;
+  const items=[...document.querySelectorAll(".furniture")];
+  const maxZ=Math.max(10,...items.map(x=>Number(x.style.zIndex)||0));
+  selectedFurniture.style.zIndex=String(maxZ+1);
+  saveLayout();
+});
+
+document.getElementById("sendBackBtn").addEventListener("click",()=>{
+  if(!selectedFurniture) return;
+  selectedFurniture.style.zIndex="1";
+  saveLayout();
 });
 
 document.getElementById("coachBtn").addEventListener("click",()=>{
@@ -179,5 +262,10 @@ document.getElementById("coachBtn").addEventListener("click",()=>{
     : "今日覚えたこと：中央の余白を残す";
   document.getElementById("coachCard").classList.remove("hidden");
 });
+
+["roomSize","roomShape","housing"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",saveRoomSettings);
+});
+restoreRoomSettings();
 
 renderResults();
