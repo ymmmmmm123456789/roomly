@@ -1,11 +1,13 @@
-ROOMLY 最新版アップロード用
+GitHubの roomly リポジトリで、このZIPを解凍して
+index.html / styles.css / app.js を上書きアップロードしてください。
+画像 inspo1.jpg〜inspo8.jpg は既存のものをそのまま使えます。
 
-GitHub の roomly リポジトリで:
-1. Add file → Upload files
-2. この index.html をアップロードして既存の index.html を上書き
-3. Commit changes
-4. GitHub Pages の反映後に公開URLを再読み込み
-
-既存の inspo1.jpg〜inspo8.jpg は消さず、そのまま残してください。
-
-この版には現在のROOMLYプロトタイプのUIを1つの index.html にまとめています。
+今回の修正:
+- 元のROOMLYデザインを復元
+- 家具の90度回転
+- 家具サイズ変更
+- 家具カラー変更 + 9色プリセット
+- 前面/背面
+- ラグ自動背面
+- 窓/ドアをドラッグ移動
+- レイアウト保存

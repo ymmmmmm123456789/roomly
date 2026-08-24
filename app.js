@@ -3,8 +3,8 @@ const screens = [...document.querySelectorAll(".screen")];
 const navButtons = [...document.querySelectorAll(".bottom-nav button")];
 let currentPin = null;
 let selectedFurniture = null;
-const LAYOUT_STORAGE_KEY = "roomly-myroom-layout-v2";
-const ROOM_STORAGE_KEY = "roomly-room-settings-v1";
+const LAYOUT_STORAGE_KEY="roomly-layout-v3";
+const ROOM_SETTINGS_KEY="roomly-room-settings-v1";
 
 const pins = [
   {img:"inspo8.jpg",name:"Graphic warm",base:94,why:"低めのソファと大きめラグで、視線が散らかりにくい。8畳でもまとまりを作りやすい構成です。",tags:["白いローソファ","柄ラグ","オレンジ照明"],sense:"白と木をベースに、オレンジを少量だけ使っているので、物が多くても全体がまとまって見えます。"},
@@ -32,9 +32,25 @@ document.querySelectorAll("[data-nav]").forEach(b=>b.addEventListener("click",()
 
 document.getElementById("matchBtn").addEventListener("click",()=>{
   ["roomSize","roomShape","housing"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",saveRoomSettings);
+  const el=document.getElementById(id);
+  el.addEventListener("change",()=>{
+    try{
+      localStorage.setItem(ROOM_SETTINGS_KEY,JSON.stringify({
+        roomSize:document.getElementById("roomSize").value,
+        roomShape:document.getElementById("roomShape").value,
+        housing:document.getElementById("housing").value
+      }));
+    }catch(_){}
+  });
 });
-restoreRoomSettings();
+try{
+  const rs=JSON.parse(localStorage.getItem(ROOM_SETTINGS_KEY)||"null");
+  if(rs){
+    if(rs.roomSize)document.getElementById("roomSize").value=rs.roomSize;
+    if(rs.roomShape)document.getElementById("roomShape").value=rs.roomShape;
+    if(rs.housing)document.getElementById("housing").value=rs.housing;
+  }
+}catch(_){}
 
 renderResults();
   showScreen("resultsScreen");
@@ -94,69 +110,20 @@ const specs={
   shelf:{label:"SHELF",cls:"shelf"}
 };
 
-
-function saveLayout(){
-  try{
-    const items=[...document.querySelectorAll(".furniture")].map((el,index)=>({
-      type:el.dataset.type,
-      left:el.style.left,
-      top:el.style.top,
-      zIndex:el.style.zIndex || String(index+1)
-    }));
-    localStorage.setItem(LAYOUT_STORAGE_KEY,JSON.stringify(items));
-  }catch(_){}
-}
-
-function restoreLayout(){
-  try{
-    const items=JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY)||"null");
-    if(!Array.isArray(items)||!items.length)return false;
-    document.querySelectorAll(".furniture").forEach(x=>x.remove());
-    items.forEach(item=>{
-      const el=addFurniture(item.type,0,0,false);
-      el.style.left=item.left||"40%";
-      el.style.top=item.top||"40%";
-      el.style.zIndex=item.zIndex||"";
-    });
-    selectedFurniture=null;
-    document.querySelectorAll(".furniture").forEach(x=>x.classList.remove("selected"));
-    return true;
-  }catch(_){return false;}
-}
-
-function saveRoomSettings(){
-  try{
-    localStorage.setItem(ROOM_STORAGE_KEY,JSON.stringify({
-      size:document.getElementById("roomSize").value,
-      shape:document.getElementById("roomShape").value,
-      housing:document.getElementById("housing").value
-    }));
-  }catch(_){}
-}
-
-function restoreRoomSettings(){
-  try{
-    const d=JSON.parse(localStorage.getItem(ROOM_STORAGE_KEY)||"null");
-    if(!d)return;
-    if(d.size)document.getElementById("roomSize").value=d.size;
-    if(d.shape)document.getElementById("roomShape").value=d.shape;
-    if(d.housing)document.getElementById("housing").value=d.housing;
-  }catch(_){}
-}
-
 function addFurniture(type,x=42,y=42,shouldSave=true){
   const spec=specs[type];
   const el=document.createElement("div");
   el.className=`furniture ${spec.cls}`;
   el.textContent=spec.label;
   el.dataset.type=type;
+  el.dataset.rotation="0";
+  el.dataset.scale="100";
   el.style.left=x+"%";
   el.style.top=y+"%";
+  el.style.zIndex=type==="rug" ? "1" : String(10+document.querySelectorAll(".furniture").length);
   canvas.appendChild(el);
   bindFurniture(el);
   selectFurniture(el);
-  if(type==="rug") el.style.zIndex="1";
-  else el.style.zIndex=String(10 + document.querySelectorAll(".furniture").length);
   if(shouldSave) saveLayout();
   return el;
 }
@@ -170,9 +137,18 @@ function seedFurniture(){
 }
 
 function selectFurniture(el){
-  document.querySelectorAll(".furniture").forEach(x=>x.classList.remove("selected"));
+  document.querySelectorAll(".furniture,.opening").forEach(x=>x.classList.remove("selected"));
   selectedFurniture=el;
-  if(el) el.classList.add("selected");
+  if(el){
+    el.classList.add("selected");
+    document.getElementById("editPanel").classList.remove("hidden");
+    const scale=Number(el.dataset.scale||100);
+    document.getElementById("sizeRange").value=scale;
+    document.getElementById("sizeValue").textContent=scale+"%";
+    if(el.dataset.color) document.getElementById("colorPicker").value=el.dataset.color;
+  }else{
+    document.getElementById("editPanel").classList.add("hidden");
+  }
 }
 
 function bindFurniture(el){
@@ -207,40 +183,169 @@ function bindFurniture(el){
   el.addEventListener("pointercancel",end);
 }
 
+
+function applyTransform(el){
+  const rotation=Number(el.dataset.rotation||0);
+  const scale=Number(el.dataset.scale||100)/100;
+  el.style.transform=`rotate(${rotation}deg) scale(${scale})`;
+}
+
+function saveLayout(){
+  try{
+    const furniture=[...document.querySelectorAll(".furniture")].map(el=>({
+      type:el.dataset.type,
+      left:el.style.left,
+      top:el.style.top,
+      zIndex:el.style.zIndex,
+      rotation:el.dataset.rotation||"0",
+      scale:el.dataset.scale||"100",
+      color:el.dataset.color||""
+    }));
+    const openings=[...document.querySelectorAll(".opening")].map(el=>({
+      opening:el.dataset.opening,
+      left:el.style.left,
+      top:el.style.top,
+      right:el.style.right,
+      bottom:el.style.bottom
+    }));
+    localStorage.setItem(LAYOUT_STORAGE_KEY,JSON.stringify({furniture,openings}));
+  }catch(_){}
+}
+
+function restoreLayout(){
+  try{
+    const data=JSON.parse(localStorage.getItem(LAYOUT_STORAGE_KEY)||"null");
+    if(!data || !Array.isArray(data.furniture) || !data.furniture.length) return false;
+    document.querySelectorAll(".furniture").forEach(el=>el.remove());
+    data.furniture.forEach(item=>{
+      const el=addFurniture(item.type,0,0,false);
+      el.style.left=item.left||"40%";
+      el.style.top=item.top||"40%";
+      el.style.zIndex=item.zIndex||"10";
+      el.dataset.rotation=item.rotation||"0";
+      el.dataset.scale=item.scale||"100";
+      if(item.color){
+        el.dataset.color=item.color;
+        el.style.background=item.color;
+      }
+      applyTransform(el);
+    });
+    if(Array.isArray(data.openings)){
+      data.openings.forEach(item=>{
+        const el=document.querySelector(`.opening[data-opening="${item.opening}"]`);
+        if(!el) return;
+        el.style.left=item.left||"";
+        el.style.top=item.top||"";
+        el.style.right=item.right||"";
+        el.style.bottom=item.bottom||"";
+      });
+    }
+    selectedFurniture=null;
+    document.querySelectorAll(".furniture,.opening").forEach(x=>x.classList.remove("selected"));
+    document.getElementById("editPanel").classList.add("hidden");
+    return true;
+  }catch(_){return false;}
+}
+
+function bindOpening(el){
+  let drag=null;
+  el.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+    selectFurniture(el);
+    const cr=canvas.getBoundingClientRect();
+    const er=el.getBoundingClientRect();
+    drag={id:e.pointerId,dx:e.clientX-er.left,dy:e.clientY-er.top};
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener("pointermove",e=>{
+    if(!drag || drag.id!==e.pointerId) return;
+    const cr=canvas.getBoundingClientRect();
+    const er=el.getBoundingClientRect();
+    let x=e.clientX-cr.left-drag.dx;
+    let y=e.clientY-cr.top-drag.dy;
+    x=Math.max(-er.width*.25,Math.min(x,cr.width-er.width*.75));
+    y=Math.max(-er.height*.25,Math.min(y,cr.height-er.height*.75));
+    el.style.left=(x/cr.width*100)+"%";
+    el.style.top=(y/cr.height*100)+"%";
+    el.style.right="auto";
+    el.style.bottom="auto";
+  });
+  const end=e=>{
+    if(!drag) return;
+    try{el.releasePointerCapture(e.pointerId)}catch(_){}
+    drag=null;
+    saveLayout();
+  };
+  el.addEventListener("pointerup",end);
+  el.addEventListener("pointercancel",end);
+}
+
+document.querySelectorAll(".opening").forEach(bindOpening);
+
+document.getElementById("rotateLeftBtn").addEventListener("click",()=>{
+  if(!selectedFurniture || selectedFurniture.classList.contains("opening")) return;
+  selectedFurniture.dataset.rotation=String((Number(selectedFurniture.dataset.rotation||0)-90)%360);
+  applyTransform(selectedFurniture); saveLayout();
+});
+document.getElementById("rotateRightBtn").addEventListener("click",()=>{
+  if(!selectedFurniture || selectedFurniture.classList.contains("opening")) return;
+  selectedFurniture.dataset.rotation=String((Number(selectedFurniture.dataset.rotation||0)+90)%360);
+  applyTransform(selectedFurniture); saveLayout();
+});
+document.getElementById("bringFrontBtn").addEventListener("click",()=>{
+  if(!selectedFurniture) return;
+  const maxZ=Math.max(10,...[...canvas.children].map(x=>Number(x.style.zIndex)||0));
+  selectedFurniture.style.zIndex=String(maxZ+1); saveLayout();
+});
+document.getElementById("sendBackBtn").addEventListener("click",()=>{
+  if(!selectedFurniture) return;
+  selectedFurniture.style.zIndex="1"; saveLayout();
+});
+document.getElementById("sizeRange").addEventListener("input",e=>{
+  if(!selectedFurniture || selectedFurniture.classList.contains("opening")) return;
+  selectedFurniture.dataset.scale=e.target.value;
+  document.getElementById("sizeValue").textContent=e.target.value+"%";
+  applyTransform(selectedFurniture); saveLayout();
+});
+document.getElementById("colorPicker").addEventListener("input",e=>{
+  if(!selectedFurniture || selectedFurniture.classList.contains("opening")) return;
+  selectedFurniture.dataset.color=e.target.value;
+  selectedFurniture.style.background=e.target.value;
+  saveLayout();
+});
+document.querySelectorAll("[data-color]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    if(!selectedFurniture || selectedFurniture.classList.contains("opening")) return;
+    const color=btn.dataset.color;
+    selectedFurniture.dataset.color=color;
+    selectedFurniture.style.background=color;
+    document.getElementById("colorPicker").value=color;
+    saveLayout();
+  });
+});
+
 document.querySelectorAll("#furnitureToolbar button").forEach(btn=>{
   btn.addEventListener("click",()=>{
     const count=document.querySelectorAll(".furniture").length;
     addFurniture(btn.dataset.type,36+(count%3)*8,34+(count%4)*7);
+    saveLayout();
   });
 });
 
 document.getElementById("deleteSelectedBtn").addEventListener("click",()=>{
-  if(selectedFurniture){
+  if(selectedFurniture && selectedFurniture.classList.contains("furniture")){
     selectedFurniture.remove();
     selectedFurniture=null;
+    document.getElementById("editPanel").classList.add("hidden");
     saveLayout();
   }
 });
 document.getElementById("clearBtn").addEventListener("click",()=>{
   document.querySelectorAll(".furniture").forEach(x=>x.remove());
   selectedFurniture=null;
-  try{localStorage.removeItem(LAYOUT_STORAGE_KEY)}catch(_){}
+  document.getElementById("editPanel").classList.add("hidden");
+  localStorage.removeItem(LAYOUT_STORAGE_KEY);
   document.getElementById("coachCard").classList.add("hidden");
-});
-
-
-document.getElementById("bringFrontBtn").addEventListener("click",()=>{
-  if(!selectedFurniture) return;
-  const items=[...document.querySelectorAll(".furniture")];
-  const maxZ=Math.max(10,...items.map(x=>Number(x.style.zIndex)||0));
-  selectedFurniture.style.zIndex=String(maxZ+1);
-  saveLayout();
-});
-
-document.getElementById("sendBackBtn").addEventListener("click",()=>{
-  if(!selectedFurniture) return;
-  selectedFurniture.style.zIndex="1";
-  saveLayout();
 });
 
 document.getElementById("coachBtn").addEventListener("click",()=>{
@@ -264,8 +369,24 @@ document.getElementById("coachBtn").addEventListener("click",()=>{
 });
 
 ["roomSize","roomShape","housing"].forEach(id=>{
-  document.getElementById(id).addEventListener("change",saveRoomSettings);
+  const el=document.getElementById(id);
+  el.addEventListener("change",()=>{
+    try{
+      localStorage.setItem(ROOM_SETTINGS_KEY,JSON.stringify({
+        roomSize:document.getElementById("roomSize").value,
+        roomShape:document.getElementById("roomShape").value,
+        housing:document.getElementById("housing").value
+      }));
+    }catch(_){}
+  });
 });
-restoreRoomSettings();
+try{
+  const rs=JSON.parse(localStorage.getItem(ROOM_SETTINGS_KEY)||"null");
+  if(rs){
+    if(rs.roomSize)document.getElementById("roomSize").value=rs.roomSize;
+    if(rs.roomShape)document.getElementById("roomShape").value=rs.roomShape;
+    if(rs.housing)document.getElementById("housing").value=rs.housing;
+  }
+}catch(_){}
 
 renderResults();

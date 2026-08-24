@@ -1,253 +1,202 @@
-<div id="pin-room-app" class="w-full space-y-5">
-  <style>
-    #pin-room-app{max-width:760px;margin:0 auto}
-    #pin-room-app .app-shell{border:1px solid var(--viz-border);border-radius:28px;overflow:hidden;background:var(--viz-panel)}
-    #pin-room-app .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--viz-border);background:var(--viz-card)}
-    #pin-room-app .brand{font-weight:600;letter-spacing:-0.01em}
-    #pin-room-app .pin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    #pin-room-app .pin-card{position:relative;aspect-ratio:4/5;border:1px solid var(--viz-border);border-radius:18px;overflow:hidden;background:var(--viz-chip-card);cursor:pointer}
-    #pin-room-app .pin-card.selected{outline:3px solid var(--viz-accent)}
-    #pin-room-app .pin-art{position:absolute;inset:0;display:flex;align-items:flex-end;padding:12px;color:white;background:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.58))}
-    #pin-room-app .pin-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    #pin-room-app .pin-art>*{position:relative;z-index:1}
-    #pin-room-app .pin-tag{font-size:12px;padding:5px 8px;border-radius:999px;background:var(--viz-card);border:1px solid var(--viz-border)}
-    #pin-room-app .step{display:none;padding:18px}
-    #pin-room-app .step.active{display:block}
-    #pin-room-app .hero{padding:22px 18px 10px}
-    #pin-room-app .hero h2{font-size:1.35rem;line-height:1.35;font-weight:600;letter-spacing:-0.02em}
-    #pin-room-app .primary{background:var(--viz-accent);color:var(--viz-accent-text);border-color:var(--viz-accent)}
-    #pin-room-app .flow{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
-    #pin-room-app .flow-item{border:1px solid var(--viz-border);border-radius:14px;padding:10px;background:var(--viz-card);text-align:center}
-    #pin-room-app .result-card{border:1px solid var(--viz-border);border-radius:16px;padding:12px;background:var(--viz-card)}
-    #pin-room-app .reason{margin-top:8px;font-size:13px;color:var(--viz-muted)}
-    #pin-room-app .why{margin-top:8px;padding:10px;border-radius:12px;background:var(--viz-accent-bg-subtle);font-size:13px;color:var(--viz-text)}
-    #pin-room-app .takeaway{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-    #pin-room-app .takeaway span{padding:5px 8px;border-radius:999px;border:1px solid var(--viz-border);background:var(--viz-chip-card);font-size:12px}
-    #pin-room-app .add-panel{margin-top:18px;border-top:1px solid var(--viz-border);padding-top:14px}
-    #pin-room-app .add-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px}
-    #pin-room-app .add-row button{flex:0 0 auto;min-width:78px;border:1px solid var(--viz-border);border-radius:14px;padding:10px;background:var(--viz-card);font-size:12px}
-    #pin-room-app .layer-menu{display:none;position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:50;width:min(92vw,520px);border:1px solid var(--viz-border);border-radius:18px;padding:10px;background:var(--viz-card);box-shadow:0 12px 28px rgba(0,0,0,.16)}
-    #pin-room-app .layer-menu.active{display:block}
-    #pin-room-app .layer-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-    #pin-room-app .layer-actions button{border:1px solid var(--viz-border);border-radius:12px;padding:10px 8px;background:var(--viz-chip-card);font-size:12px}
-    #pin-room-app .furniture-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid var(--viz-border)}
-    #pin-room-app .furniture-options label{font-size:12px;color:var(--viz-muted)}
-    #pin-room-app .furniture-options input{margin-top:6px;width:100%}
-    #pin-room-app .opening-options{margin-top:10px;padding-top:10px;border-top:1px solid var(--viz-border)}
-    #pin-room-app .opening-options .opening-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-    #pin-room-app .opening-options button{border:1px solid var(--viz-border);border-radius:12px;padding:10px 8px;background:var(--viz-chip-card);font-size:12px}
-    @media(max-width:480px){#pin-room-app .topbar{padding:14px 15px}#pin-room-app .hero{padding:18px 15px 6px}#pin-room-app .step{padding:15px}}
-  </style>
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#f7f2ec" />
+  <title>ROOMLY — Pinterestの憧れを、自分の部屋サイズに。</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">ROOMLY</div>
+    <div class="beta">BETA</div>
+  </header>
 
-  <div class="app-shell">
-  <div class="topbar">
-    <div>
-      <div class="brand">ROOMLY</div>
-      <div class="text-sm text-muted">Pinterest × your room</div>
-    </div>
-    <span id="stepBadge" class="viz-badge">1 / 3</span>
-  </div>
-  <div class="hero">
-    <div>
-      <h2>あなたのPinterestから、<br>「この部屋なら真似できる」を見つける。</h2>
-      <p class="mt-2 text-sm text-muted">保存したPinと自分の部屋をつなぐだけ。真似しやすい順にROOMLYが整理します。</p>
-      <div class="flow">
-        <div class="flow-item"><div class="text-sm text-muted">1</div><div class="text-sm font-medium">Pinterest</div></div>
-        <div class="flow-item"><div class="text-sm text-muted">2</div><div class="text-sm font-medium">自分の部屋</div></div>
-        <div class="flow-item"><div class="text-sm text-muted">3</div><div class="text-sm font-medium">MATCH結果</div></div>
+  <main class="app">
+    <section class="screen active" id="homeScreen">
+      <div class="hero">
+        <p class="eyebrow">Pinterest × your room</p>
+        <h1>Pinterestの憧れを、<br>自分の部屋サイズに。</h1>
+        <p class="lead">保存した“好き”から、自分の部屋で真似しやすいインテリアを見つけよう。</p>
+        <button class="primary" id="startBtn">Pinterest連携を試す（デモ）</button>
+        <p class="note">β版ではデモデータを使います。Pinterest APIはまだ未接続です。</p>
       </div>
-    </div>
-  </div>
 
-  <section id="step1" class="step active space-y-4">
-    <div class="space-y-1">
-      <div class="font-medium">① Pinterestをつなぐ</div>
-      <p class="text-sm text-muted">保存しているインテリアPinをROOMLYに読み込みます。</p>
-    </div>
-    <button id="connectBtn" type="button" class="primary w-full rounded-xl border px-4 py-4 text-base font-medium">Pinterestでログイン</button>
-    <p class="text-sm text-muted">※ デモでは、連携済みの状態を再現します。</p>
-  </section>
+      <div class="masonry" aria-label="インテリア参考画像">
+        <img src="inspo1.jpg" alt="参考インテリア1">
+        <img src="inspo2.jpg" alt="参考インテリア2">
+        <img src="inspo8.jpg" alt="参考インテリア3">
+        <img src="inspo6.jpg" alt="参考インテリア4">
+      </div>
+    </section>
 
-  <section id="step2" class="step space-y-4">
-    <div class="space-y-1">
-      <div class="font-medium">② 自分の部屋を入れる</div>
-      <p class="text-sm text-muted">まずは広さと形だけでOK。将来は間取り図アップロードにも対応。</p>
-    </div>
-    <div class="card space-y-2">
-      <label class="block text-sm">部屋の広さ
-        <select id="roomSizeIntro" class="mt-1 w-full rounded-xl border px-3 py-2 text-base">
-          <option value="6">6畳</option>
-          <option value="8" selected>8畳</option>
-          <option value="10">10畳</option>
-          <option value="12">12畳以上</option>
-        </select>
-      </label>
-      <label class="block text-sm">部屋の形
-        <select id="roomShapeIntro" class="mt-1 w-full rounded-xl border px-3 py-2 text-base">
-          <option value="rect" selected>長方形</option>
-          <option value="square">正方形</option>
-          <option value="ldk">LDK</option>
-        </select>
-      </label>
-    </div>
-    <button id="showMatchesBtn" type="button" class="primary w-full rounded-xl border px-4 py-4 text-base font-medium">この部屋に合うPinを見る</button>
-  </section>
+    <section class="screen" id="roomSetupScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="homeScreen">← 戻る</button>
+        <p class="eyebrow">STEP 1</p>
+        <h2>まず、自分の部屋を教えて。</h2>
+      </div>
 
-  <section id="step3" class="step space-y-4">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <h3 class="text-base font-medium">③ この部屋なら真似しやすいPin</h3>
-        <p class="text-sm text-muted">MATCH率と「なぜ合うか」「何を真似するか」を表示します。</p>
-      </div>
-      <span class="viz-badge">ROOM MATCH</span>
-    </div>
-    <div class="pin-grid" id="resultsGrid">
-      <div class="result-card"><div class="pin-card"><div class="pin-art"><img src="inspo1.jpg" alt="白いソファとモノトーンラグ、オレンジ照明の部屋"><span class="pin-tag">Graphic warm</span><span class="absolute right-2 top-2 viz-badge match-badge">--% MATCH</span></div></div><div class="why">合う理由：低めのソファと大きめラグで、8畳でも視線が散らかりにくい。</div><div class="reason">真似するなら</div><div class="takeaway"><span>白いローソファ</span><span>柄ラグ</span><span>オレンジ照明</span></div></div>
-      <div class="result-card"><div class="pin-card"><div class="pin-art"><img src="inspo2.jpg" alt="オレンジ照明と黒ソファの都会的な部屋"><span class="pin-tag">Retro city pop</span><span class="absolute right-2 top-2 viz-badge match-badge">--% MATCH</span></div></div><div class="why">合う理由：家具の高さが低く、差し色を点で使っているので狭い部屋でも圧迫感を出しにくい。</div><div class="reason">真似するなら</div><div class="takeaway"><span>低めソファ</span><span>丸い照明</span><span>赤・オレンジの差し色</span></div></div>
-      <div class="result-card"><div class="pin-card"><div class="pin-art"><img src="inspo3.jpg" alt="間接照明と植物がある落ち着いたリビング"><span class="pin-tag">Cozy lighting</span><span class="absolute right-2 top-2 viz-badge match-badge">--% MATCH</span></div></div><div class="why">合う理由：家具数を絞って、照明と植物で雰囲気を作っているから再現しやすい。</div><div class="reason">真似するなら</div><div class="takeaway"><span>植物2〜3点</span><span>間接照明</span><span>家具量少なめ</span></div></div>
-      <div class="result-card"><div class="pin-card"><div class="pin-art"><img src="inspo4.jpg" alt="白壁と木床、ミッドセンチュリー家具の明るい部屋"><span class="pin-tag">Airy mid-century</span><span class="absolute right-2 top-2 viz-badge match-badge">--% MATCH</span></div></div><div class="why">合う理由：壁際に家具を寄せて中央の余白を残しているので、長方形の部屋と相性がいい。</div><div class="reason">真似するなら</div><div class="takeaway"><span>木の家具</span><span>ロー家具</span><span>中央の余白</span></div></div>
-    </div>
-    <div id="layerMenu" class="layer-menu" aria-live="polite">
-      <div class="flex items-center justify-between gap-3 mb-2">
-        <div class="font-medium">選択中の家具</div>
-        <button id="closeLayerMenu" type="button" class="text-sm text-muted">閉じる</button>
-      </div>
-      <div class="layer-actions">
-        <button type="button" data-layer="front">最前面</button>
-        <button type="button" data-layer="forward">1つ前へ</button>
-        <button type="button" data-layer="backward">1つ後ろへ</button>
-        <button type="button" data-layer="back">最背面</button>
-        <button type="button" data-rotate="left">↶ 左に90°</button>
-        <button type="button" data-rotate="right">↷ 右に90°</button>
-      </div>
-      <div class="furniture-options">
-        <label>色
-          <input id="furnitureColor" type="color" value="#d8c6b5">
+      <div class="panel">
+        <label>部屋の広さ
+          <select id="roomSize">
+            <option value="6">6畳</option>
+            <option value="8" selected>8畳</option>
+            <option value="10">10畳</option>
+            <option value="12">12畳以上</option>
+          </select>
         </label>
-        <label>サイズ <span id="furnitureSizeValue">100%</span>
-          <input id="furnitureSize" type="range" min="60" max="160" value="100" step="5">
+        <label>部屋の形
+          <select id="roomShape">
+            <option value="rect" selected>長方形</option>
+            <option value="square">正方形</option>
+            <option value="ldk">LDK</option>
+          </select>
+        </label>
+        <label>住まい
+          <select id="housing">
+            <option value="rental" selected>賃貸</option>
+            <option value="owned">持ち家</option>
+          </select>
         </label>
       </div>
-      <div class="takeaway" aria-label="おすすめカラー">
-        <span>アイボリー</span><span>ベージュ</span><span>ブラウン</span><span>ブラック</span><span>グレー</span><span>オレンジ</span><span>レッド</span><span>グリーン</span><span>ブルー</span>
+
+      <button class="primary" id="matchBtn">この部屋に合うPinを見る</button>
+    </section>
+
+    <section class="screen" id="resultsScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="roomSetupScreen">← 条件を変える</button>
+        <p class="eyebrow">ROOM MATCH</p>
+        <h2>この部屋なら、こんなPinが真似しやすい。</h2>
+        <p class="lead small">写真をタップすると「何を真似するか」を見られます。</p>
       </div>
-      <div class="opening-options">
-        <div class="text-sm font-medium">窓・ドア</div>
-        <p class="mt-1 text-sm text-muted">窓やドアも選択して、壁に沿って位置を変えられます。</p>
-        <div class="opening-actions">
-          <button type="button" data-opening="window">▭ 窓を選択</button>
-          <button type="button" data-opening="door">↗ ドアを選択</button>
+
+      <div class="results-grid" id="resultsGrid"></div>
+    </section>
+
+    <section class="screen" id="detailScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="resultsScreen">← 戻る</button>
+        <p class="eyebrow">PIN DETAIL</p>
+        <h2 id="detailTitle">このPinから真似するなら</h2>
+      </div>
+      <img id="detailImage" class="detail-image" alt="">
+      <div class="score-row">
+        <div>
+          <div class="match-big" id="detailScore">92%</div>
+          <div class="muted">ROOM MATCH</div>
+        </div>
+        <div class="sense-chip">Sense tip</div>
+      </div>
+
+      <div class="panel">
+        <h3>合う理由</h3>
+        <p id="detailWhy"></p>
+      </div>
+
+      <div class="panel">
+        <h3>真似するなら</h3>
+        <div class="tags" id="detailTags"></div>
+      </div>
+
+      <div class="panel sense-panel">
+        <h3>なぜおしゃれ？</h3>
+        <p id="detailSense"></p>
+      </div>
+
+      <button class="primary" id="tryLayoutBtn">この雰囲気でレイアウトしてみる</button>
+    </section>
+
+    <section class="screen" id="editorScreen">
+      <div class="section-head">
+        <button class="ghost" data-back="detailScreen">← 戻る</button>
+        <p class="eyebrow">MY ROOM EDITOR</p>
+        <h2>指で家具を動かしてみよう。</h2>
+        <p class="lead small">家具はタップして選択 → そのままドラッグ。スマホ操作優先。</p>
+      </div>
+
+      <div class="reference-card">
+        <img id="referenceImage" alt="参考インテリア">
+        <div>
+          <div class="muted tiny">参考Pin</div>
+          <strong id="referenceTitle">Inspiration</strong>
         </div>
       </div>
-      <p class="mt-2 text-sm text-muted">ラグは追加時に自動で背面に入ります。家具は回転・色・サイズ、窓とドアは位置を調整できます。</p>
-    </div>
-    <button id="restartBtn" type="button" class="w-full rounded-xl border px-4 py-3 text-base">条件を変える</button>
-  </section>
 
-  <p id="status" class="px-4 pb-4 text-sm text-muted text-center" aria-live="polite"></p>
-  </div>
+      <div id="roomCanvas" class="room-canvas" aria-label="2D room editor">
+        <div class="window-mark opening" data-opening="window">窓</div>
+        <div class="door-mark opening" data-opening="door">入口</div>
+      </div>
 
-  <script>
-    (()=>{
-      const root=document.getElementById('pin-room-app');
-      if(!root||root.dataset.ready)return;
-      root.dataset.ready='1';
-      const STORAGE_KEY='roomly-layout-v1';
-      const steps=[1,2,3];
-      const badge=root.querySelector('#stepBadge');
-      const status=root.querySelector('#status');
-      function go(n){steps.forEach(i=>root.querySelector('#step'+i).classList.toggle('active',i===n));badge.textContent=n+' / 3';status.textContent='';}
+      <div class="furniture-toolbar" id="furnitureToolbar">
+        <button data-type="sofa">🛋️<span>ソファ</span></button>
+        <button data-type="tv">📺<span>TV</span></button>
+        <button data-type="table">◯<span>テーブル</span></button>
+        <button data-type="rug">▭<span>ラグ</span></button>
+        <button data-type="plant">🌿<span>植物</span></button>
+        <button data-type="lamp">💡<span>ライト</span></button>
+        <button data-type="shelf">▥<span>棚</span></button>
+      </div>
 
-      function loadSavedState(){
-        try{
-          const raw=localStorage.getItem(STORAGE_KEY);
-          if(!raw)return;
-          const data=JSON.parse(raw);
-          if(data.roomSize)roomSize.value=data.roomSize;
-          if(data.roomShape)roomShape.value=data.roomShape;
-          status.textContent='前回の部屋設定を復元しました。';
-        }catch(e){}
-      }
+      <div id="editPanel" class="edit-panel hidden">
+        <div class="edit-panel-title">選択中を編集</div>
 
-      function saveState(){
-        try{
-          localStorage.setItem(STORAGE_KEY,JSON.stringify({
-            roomSize:roomSize.value,
-            roomShape:roomShape.value,
-            savedAt:new Date().toISOString()
-          }));
-          status.textContent='この部屋設定を保存しました。';
-        }catch(e){
-          status.textContent='保存できませんでした。ブラウザ設定をご確認ください。';
-        }
-      }
+        <div class="edit-buttons">
+          <button class="secondary" id="rotateLeftBtn">↶ 90°</button>
+          <button class="secondary" id="rotateRightBtn">↷ 90°</button>
+          <button class="secondary" id="sendBackBtn">背面へ</button>
+          <button class="secondary" id="bringFrontBtn">前面へ</button>
+        </div>
 
-      const roomSize=root.querySelector('#roomSizeIntro');
-      const roomShape=root.querySelector('#roomShapeIntro');
+        <div class="edit-fields">
+          <label>サイズ <span id="sizeValue">100%</span>
+            <input id="sizeRange" type="range" min="60" max="160" step="5" value="100">
+          </label>
+          <label>色
+            <input id="colorPicker" type="color" value="#fffaf5">
+          </label>
+        </div>
 
-      root.querySelector('#connectBtn').addEventListener('click',()=>{go(2);status.textContent='Pinterestを連携しました（デモ）。';});
-      roomSize.addEventListener('change',saveState);
-      roomShape.addEventListener('change',saveState);
+        <div class="color-swatches" aria-label="おすすめカラー">
+          <button data-color="#fffaf0" title="アイボリー"></button>
+          <button data-color="#dcc7ad" title="ベージュ"></button>
+          <button data-color="#9a7655" title="ブラウン"></button>
+          <button data-color="#242424" title="ブラック"></button>
+          <button data-color="#a9a6a0" title="グレー"></button>
+          <button data-color="#d76636" title="オレンジ"></button>
+          <button data-color="#b83a35" title="レッド"></button>
+          <button data-color="#55765d" title="グリーン"></button>
+          <button data-color="#496b91" title="ブルー"></button>
+        </div>
+      </div>
 
-      function updateMatches(){
-        const size=Number(roomSize.value);
-        const shape=roomShape.value;
-        const cards=[...root.querySelectorAll('#resultsGrid .result-card')];
-        const base=[94,91,86,82];
-        cards.forEach((card,index)=>{
-          let score=base[index]-(8-size)*2;
-          if(shape==='square' && index===1)score-=4;
-          if(shape==='ldk' && index===3)score+=5;
-          score=Math.max(58,Math.min(97,score));
-          card.querySelector('.match-badge').textContent=score+'% MATCH';
-        });
-      }
+      <div class="editor-actions">
+        <button class="secondary" id="deleteSelectedBtn">選択中を削除</button>
+        <button class="secondary" id="clearBtn">全部クリア</button>
+      </div>
 
-      root.querySelector('#showMatchesBtn').addEventListener('click',()=>{
-        updateMatches();
-        go(3);
-        status.textContent='Pinterestの保存Pinから、真似しやすい順に表示しています。';
-      });
+      <button class="primary" id="coachBtn">Sense Coachに見てもらう</button>
 
-      root.querySelector('#restartBtn').addEventListener('click',()=>go(2));
+      <div class="coach-card hidden" id="coachCard" aria-live="polite">
+        <div class="score-ring"><span id="senseScore">78</span></div>
+        <div>
+          <h3>Sense Coach</h3>
+          <p id="coachText">中央に少し余白を残すと、視線が奥まで抜けて広く見えます。</p>
+          <p class="lesson" id="lessonText">今日覚えたこと：家具の高さを揃える</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      const layerMenu=root.querySelector('#layerMenu');
-      let selectedFurniture=null;
-      root.querySelectorAll('[data-furniture]').forEach(btn=>btn.addEventListener('click',()=>{
-        selectedFurniture=btn.dataset.furniture;
-        layerMenu.classList.add('active');
-        status.textContent=selectedFurniture==='rug'?'ラグは自動で家具の下に配置されます。':'追加した家具を選択しました。前後関係を調整できます。';
-      }));
-      root.querySelector('#closeLayerMenu').addEventListener('click',()=>layerMenu.classList.remove('active'));
-      root.querySelectorAll('[data-layer]').forEach(btn=>btn.addEventListener('click',()=>{
-        if(!selectedFurniture)return;
-        const labels={front:'最前面',forward:'1つ前',backward:'1つ後ろ',back:'最背面'};
-        status.textContent=selectedFurniture+' を '+labels[btn.dataset.layer]+' に移動しました（デモ）。';
-      }));
-      root.querySelectorAll('[data-rotate]').forEach(btn=>btn.addEventListener('click',()=>{
-        if(!selectedFurniture)return;
-        const labels={left:'左に90°',right:'右に90°'};
-        status.textContent=selectedFurniture+' を '+labels[btn.dataset.rotate]+' 回転しました（デモ）。';
-      }));
-      const furnitureColor=root.querySelector('#furnitureColor');
-      const furnitureSize=root.querySelector('#furnitureSize');
-      const furnitureSizeValue=root.querySelector('#furnitureSizeValue');
-      furnitureColor.addEventListener('input',()=>{
-        if(!selectedFurniture)return;
-        status.textContent=selectedFurniture+' の色を '+furnitureColor.value+' に変更しました（デモ）。';
-      });
-      furnitureSize.addEventListener('input',()=>{
-        furnitureSizeValue.textContent=furnitureSize.value+'%';
-        if(!selectedFurniture)return;
-        status.textContent=selectedFurniture+' のサイズを '+furnitureSize.value+'% に変更しました（デモ）。';
-      });
-      root.querySelectorAll('[data-opening]').forEach(btn=>btn.addEventListener('click',()=>{
-        selectedFurniture=btn.dataset.opening;
-        const labels={window:'窓',door:'ドア'};
-        status.textContent=labels[selectedFurniture]+' を選択しました。レイアウト画面では壁に沿ってドラッグして位置を変更できます。';
-      }));
+  <nav class="bottom-nav">
+    <button data-nav="homeScreen" class="active">⌂<span>Home</span></button>
+    <button data-nav="resultsScreen">♡<span>Inspo</span></button>
+    <button data-nav="editorScreen">▦<span>My Room</span></button>
+    <button data-nav="detailScreen">✦<span>Sense</span></button>
+  </nav>
 
-      loadSavedState();
-    })();
-  </script>
-</div>
+  <script src="app.js"></script>
+</body>
+</html>
