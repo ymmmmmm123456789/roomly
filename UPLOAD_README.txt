@@ -1,16 +1,11 @@
-ROOMLY GitHubアップロード用 最新版
+ROOMLY 最新版アップロード用
 
-GitHubの roomly リポジトリで
-Add file → Upload files から、以下3ファイルを上書きしてください。
+GitHub の roomly リポジトリで:
+1. Add file → Upload files
+2. この index.html をアップロードして既存の index.html を上書き
+3. Commit changes
+4. GitHub Pages の反映後に公開URLを再読み込み
 
-- index.html
-- styles.css
-- app.js
+既存の inspo1.jpg〜inspo8.jpg は消さず、そのまま残してください。
 
-更新内容
-- 家具位置をブラウザに保存
-- 再読み込み後もMy Roomの配置を復元
-- 家具の「前面へ / 背面へ」
-- ラグは追加時に自動で背面
-- 部屋の広さ・形・住まい条件も保存
-- GitHubルート直下の inspo1.jpg〜inspo8.jpg に対応
+この版には現在のROOMLYプロトタイプのUIを1つの index.html にまとめています。
